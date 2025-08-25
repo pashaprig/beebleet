@@ -3,8 +3,16 @@
 Frontend developer test assignment
 Interactive form components with drag&drop
 
-* Замовник: [Bachana Biblaia](https://www.linkedin.com/in/bachana-biblaia/).
+* Сustomer: [Bachana Biblaia](https://www.linkedin.com/in/bachana-biblaia/).
 * Developer: [Pavlo Pryharnytskyi](https://www.linkedin.com/in/pavlo-pryharnytskyi/).
+
+## Installation and Setup Instructions
+
+1. Clone this repository
+2. Navigate to the project directory: `cd beebleet`
+3. Install dependencies: `npm install`
+4. Start the development server: `npm run dev`
+5. Open your browser and visit: `http://localhost:5173`
 
 ## Component overview and features implemented
 
@@ -17,11 +25,5 @@ Interactive form components with drag&drop
 - Support for common image formats (JPEG, PNG, GIF)
 
 
-## Installation and Setup Instructions
 
-1. Clone this repository
-2. Navigate to the project directory: `cd beebleet`
-3. Install dependencies: `npm install`
-4. Start the development server: `npm run dev`
-5. Open your browser and visit: `http://localhost:5173`
 
