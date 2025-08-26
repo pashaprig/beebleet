@@ -2,8 +2,22 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Slider } from "@/components/ui/slider";
+import React, { useState } from "react";
 
-export function ImageUpload(){
+const ImageUpload = React.memo(function ImageUpload(){
+  const [imageUrl, setImageUrl] = useState<string>('');
+
+  const onSelectImage = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if(!file) return
+
+    const reader = new FileReader();
+    reader.addEventListener("load", () => {
+      const imageUrl = reader.result as string;
+      setImageUrl(imageUrl);
+    });
+    reader.readAsDataURL(file);
+  };
   return (
     <Card className="w-full max-w-md">
       <CardHeader>
@@ -18,14 +32,20 @@ export function ImageUpload(){
           <input
             id="image"
             type="file"
+            onChange={onSelectImage}
             className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
           />
+
         </div>
         
         <div className="border rounded-md p-4">
           <AspectRatio ratio={16 / 9} className="bg-muted">
             <div className="flex items-center justify-center h-full">
-              <p className="text-sm text-muted-foreground">Image preview will appear here</p>
+              {imageUrl ? (
+                <img src={imageUrl} alt="Uploaded" className="w-full h-full object-cover rounded-md" />
+              ) : (
+                <p className="text-sm text-muted-foreground">Image preview will appear here</p>
+              )}
             </div>
           </AspectRatio>
         </div>
@@ -39,4 +59,6 @@ export function ImageUpload(){
       </CardContent>
     </Card>
   );
-}
+});
+
+export default ImageUpload;

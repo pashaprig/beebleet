@@ -76,4 +76,18 @@ const CardFooter = React.forwardRef<
 ))
 CardFooter.displayName = "CardFooter"
 
-export { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent }
+const MemoizedCard = React.memo(Card)
+const MemoizedCardHeader = React.memo(CardHeader)
+const MemoizedCardFooter = React.memo(CardFooter)
+const MemoizedCardTitle = React.memo(CardTitle)
+const MemoizedCardDescription = React.memo(CardDescription)
+const MemoizedCardContent = React.memo(CardContent)
+
+export {
+  MemoizedCard as Card,
+  MemoizedCardHeader as CardHeader,
+  MemoizedCardFooter as CardFooter,
+  MemoizedCardTitle as CardTitle,
+  MemoizedCardDescription as CardDescription,
+  MemoizedCardContent as CardContent
+}

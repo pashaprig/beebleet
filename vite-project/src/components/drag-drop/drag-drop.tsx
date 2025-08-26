@@ -1,7 +1,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ImageUpload } from "./ImageUpload";
-import { TextEditor } from "./TextEditor";
 import { GripVertical } from "lucide-react";
+import ImageUpload from "../image-upload/image-upload";
+import TextEditor from "../text-editor/text-editor";
 
 export function DragDropContainer() {
   return (

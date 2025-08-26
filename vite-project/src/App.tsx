@@ -1,4 +1,4 @@
-import { DragDropContainer } from "@/components/DragDropContainer"
+import { DragDropContainer } from "@/components/drag-drop/drag-drop"
 
 function App() {
   return (
