@@ -8,30 +8,42 @@ const ImageUpload = React.memo(function ImageUpload() {
   const [selectedAspectRatio, setSelectedAspectRatio] = useState<number>(1);
   const [isDownloading, setIsDownloading] = useState<boolean>(false);
   const [cropRequestId, setCropRequestId] = useState<number>(0);
+  const [shouldDownload, setShouldDownload] = useState<boolean>(false);
 
   const handleAspectRatioChange = useCallback((value: string) => {
     setSelectedAspectRatio(parseFloat(value));
   }, []);
-  
+
   // Function to trigger crop request
   const handleRequestCrop = useCallback(() => {
+    setShouldDownload(true); // Set flag to indicate this is a download request
     setCropRequestId(prev => prev + 1); // Increment to trigger effect in child component
   }, []);
   
-  // Handle the cropped image result
-  const handleImageCropped = useCallback((croppedImage: string | null) => {
+    // Handle the cropped image result
+  const handleImageCropped = useCallback((croppedImage: string | null, originalFileName?: string) => {
     setIsDownloading(true);
-    
+
     try {
       if (croppedImage) {
         // Create a temporary link element
         const link = document.createElement('a');
         link.href = croppedImage;
         
-        // Set the download attribute with a filename
+        // Get file extension from the data URL
         const fileExtension = croppedImage.startsWith('data:image/png') ? 'png' : 
                              croppedImage.startsWith('data:image/svg+xml') ? 'svg' : 'jpg';
-        link.download = `cropped-image.${fileExtension}`;
+        
+        // Create a filename based on the original filename if available
+        let downloadFilename = 'cropped-image';
+        
+        if (originalFileName) {
+          // Remove file extension from original name
+          const nameWithoutExtension = originalFileName.replace(/\.[^/.]+$/, "");
+          downloadFilename = `${nameWithoutExtension}-cropped`;
+        }
+        
+        link.download = `${downloadFilename}.${fileExtension}`;
         
         // Append to the document, trigger click and remove
         document.body.appendChild(link);
@@ -42,6 +54,7 @@ const ImageUpload = React.memo(function ImageUpload() {
       console.error('Error downloading image:', error);
     } finally {
       setIsDownloading(false);
+      setShouldDownload(false); // Reset the download flag
     }
   }, []);
 
@@ -53,18 +66,19 @@ const ImageUpload = React.memo(function ImageUpload() {
       </CardHeader>
       <CardContent className="space-y-4">
 
-        <ImageCroper 
+        <ImageCroper
           aspectRatio={selectedAspectRatio}
-          onRequestCrop={cropRequestId > 0 ? () => {} : undefined}
+          onRequestCrop={cropRequestId > 0 ? () => { } : undefined}
           onImageCropped={handleImageCropped}
+          shouldDownload={shouldDownload}
         />
-        <ImageRatios 
-          selectedAspectRatio={selectedAspectRatio} 
-          handleAspectRatioChange={handleAspectRatioChange} 
+        <ImageRatios
+          selectedAspectRatio={selectedAspectRatio}
+          handleAspectRatioChange={handleAspectRatioChange}
         />
 
-        <Button 
-          className="w-full text-lg font-medium" 
+        <Button
+          className="w-full text-lg font-medium"
           onClick={handleRequestCrop}
           disabled={isDownloading}
         >

@@ -1,16 +1,25 @@
-import ReactCrop, { centerCrop, makeAspectCrop, type Crop } from 'react-image-crop'
+import ReactCrop, { type Crop } from 'react-image-crop'
 import React, { useEffect, useState, useRef } from "react";
 import { FORMAT_EXTENSIONS, MAX_FILE_SIZE, MIN_DIMENSION, SUPPORTED_FORMATS } from '@/consts/consts';
 
 
-interface ImageCroperProps {
+type ImageCroperProps = {
   aspectRatio?: number;
   onRequestCrop?: () => void;
-  onImageCropped?: (croppedImage: string | null) => void;
+  onImageCropped?: (croppedImage: string | null, originalFileName?: string) => void;
+  shouldDownload?: boolean;
 }
 
-const ImageCroper = React.memo(function ImageCroper({ aspectRatio = 1, onRequestCrop, onImageCropped }: ImageCroperProps) {
-  const [crop, setCrop] = useState<Crop>();
+const ImageCroper = React.memo(function ImageCroper({ aspectRatio = 1, onRequestCrop, onImageCropped, shouldDownload = false }: ImageCroperProps) {
+  // Initialize crop with a default value
+  const [crop, setCrop] = useState<Crop>({
+    unit: '%' as const,
+    width: 75,
+    height: 75 / aspectRatio,
+    x: 12.5,
+    y: 12.5
+  });
+  const [completedCrop, setCompletedCrop] = useState<Crop | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [imageUrl, setImageUrl] = useState<string>('');
   const [isDragging, setIsDragging] = useState<boolean>(false);
@@ -19,16 +28,16 @@ const ImageCroper = React.memo(function ImageCroper({ aspectRatio = 1, onRequest
 
 
   const processFile = (file: File) => {
-    if (!file) return;    
+    if (!file) return;
     setFileName(file.name);
-    
+
     // Check if file format is supported
     if (!SUPPORTED_FORMATS.includes(file.type)) {
       setFileName('');
       setError(`Unsupported file format. Please use ${FORMAT_EXTENSIONS}`);
       return;
     }
-    
+
     // Check file size
     if (file.size > MAX_FILE_SIZE) {
       setFileName('');
@@ -37,12 +46,12 @@ const ImageCroper = React.memo(function ImageCroper({ aspectRatio = 1, onRequest
     }
 
     const reader = new FileReader();
-    
+
     reader.addEventListener("error", () => {
       setFileName('');
       setError('Error reading file. Please try again.');
     });
-    
+
     reader.addEventListener("load", () => {
       const imageElement = new Image();
       const imageUrl = reader.result as string;
@@ -60,20 +69,20 @@ const ImageCroper = React.memo(function ImageCroper({ aspectRatio = 1, onRequest
         }
         setImageUrl(imageUrl);
       });
-      
+
       imageElement.addEventListener('error', () => {
         setFileName('');
         setError('Error loading image. The file may be corrupted.');
       });
     });
-    
+
     reader.readAsDataURL(file);
   };
 
   const onSelectImage = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    
+
     processFile(file);
   };
 
@@ -99,7 +108,7 @@ const ImageCroper = React.memo(function ImageCroper({ aspectRatio = 1, onRequest
     e.preventDefault();
     e.stopPropagation();
     setIsDragging(false);
-    
+
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
       const file = e.dataTransfer.files[0];
       if (SUPPORTED_FORMATS.includes(file.type)) {
@@ -111,120 +120,141 @@ const ImageCroper = React.memo(function ImageCroper({ aspectRatio = 1, onRequest
     }
   };
 
-  // Function to create a centered crop with the given aspect ratio
-  const createCrop = (width: number, height: number, aspect: number) => {
-    const cropWidthinPercent = Math.min((MIN_DIMENSION / width) * 100, 90);
-    const crop = makeAspectCrop(
-      {
-        unit: '%',
-        width: cropWidthinPercent,
-      }, 
-      aspect,
-      width,
-      height
-    );
-    return centerCrop(crop, width, height);
-  };
+
 
   const onImageLoad = (e: React.SyntheticEvent<HTMLImageElement>) => {
     const img = e.currentTarget;
-    imgRef.current = img;
     const { width, height } = img;
-    const newCrop = createCrop(width, height, aspectRatio);
+    
+    // Create a centered crop that takes 75% of the image width
+    const newCrop: Crop = {
+      unit: '%' as const,
+      width: 75,
+      height: (75 / aspectRatio) * (width / height),
+      x: 12.5,
+      y: (100 - (75 / aspectRatio) * (width / height)) / 2
+    };
+    
+    // Update the crop state
     setCrop(newCrop);
+    
+    // Also set as completed crop
+    setCompletedCrop(newCrop);
   };
-// Update crop when aspect ratio changes
-useEffect(() => {
-  if (imgRef.current && imageUrl) {
-    const { width, height } = imgRef.current;
-    const newCrop = createCrop(width, height, aspectRatio);
-    setCrop(newCrop);
-  }
-// eslint-disable-next-line react-hooks/exhaustive-deps
-}, [aspectRatio, imageUrl]);
-
-// Function to get the cropped image
-const getCroppedImage = () => {
-  if (!crop || !imgRef.current) {
-    return null;
-  }
-
-  const image = imgRef.current;
-  const canvas = document.createElement('canvas');
-  const scaleX = image.naturalWidth / image.width;
-  const scaleY = image.naturalHeight / image.height;
-  
-  const pixelRatio = window.devicePixelRatio || 1;
-  
-  // Calculate dimensions
-  const cropWidth = crop.width * scaleX;
-  const cropHeight = crop.height * scaleY;
-  
-  // Set canvas size
-  canvas.width = cropWidth * pixelRatio;
-  canvas.height = cropHeight * pixelRatio;
-  
-  const ctx = canvas.getContext('2d');
-  
-  if (!ctx) {
-    return null;
-  }
-  
-  // Set quality
-  ctx.imageSmoothingQuality = 'high';
-  ctx.scale(pixelRatio, pixelRatio);
-  
-  // Draw the cropped image
-  const cropX = crop.x * scaleX;
-  const cropY = crop.y * scaleY;
-  
-  ctx.drawImage(
-    image,
-    cropX, cropY, cropWidth, cropHeight,
-    0, 0, cropWidth, cropHeight
-  );
-  
-  // Get file extension from original file name
-  const fileExtension = fileName.split('.').pop()?.toLowerCase() || 'jpeg';
-  let mimeType = 'image/jpeg'; // default
-  
-  if (fileExtension === 'png') {
-    mimeType = 'image/png';
-  } else if (fileExtension === 'svg') {
-    mimeType = 'image/svg+xml';
-  }
-  
-  // Convert canvas to blob
-  return canvas.toDataURL(mimeType, 0.95);
-};
-
-// Function to handle image cropping
-const handleCropImage = () => {
-  if (!crop || !imgRef.current) {
-    setError('Please select an area to crop first');
-    if (onImageCropped) {
-      onImageCropped(null);
+  // Update crop when aspect ratio changes
+  useEffect(() => {
+    if (imgRef.current && imageUrl) {
+      const img = imgRef.current;
+      const { width, height } = img;
+      
+      // Create a centered crop with the new aspect ratio
+      const newCrop: Crop = {
+        unit: '%' as const,
+        width: 75,
+        height: (75 / aspectRatio) * (width / height),
+        x: 12.5,
+        y: (100 - (75 / aspectRatio) * (width / height)) / 2
+      };
+      
+      // Update both crop states
+      setCrop(newCrop);
+      setCompletedCrop(newCrop);
     }
-    return;
-  }
-  
-  const croppedImageUrl = getCroppedImage();
-  
-  if (onImageCropped) {
-    onImageCropped(croppedImageUrl);
-  }
-};
+  }, [aspectRatio, imageUrl]);
 
-// Listen for crop requests from parent
-useEffect(() => {
-  // If onRequestCrop is provided (not undefined), trigger the crop
-  if (onRequestCrop !== undefined) {
-    handleCropImage();
-  }
-// eslint-disable-next-line react-hooks/exhaustive-deps
-}, [onRequestCrop]);
+  // Function to get the cropped image
+  const getCroppedImage = () => {
+    // Make sure we have an image and a completed crop
+    if (!imgRef.current || !completedCrop) {
+      return null;
+    }
 
-  return (
+    const image = imgRef.current;
+    const canvas = document.createElement('canvas');
+    
+    // Get the scale to convert from percentage to pixels
+    const scaleX = image.naturalWidth / 100;
+    const scaleY = image.naturalHeight / 100;
+
+    const pixelRatio = window.devicePixelRatio || 1;
+
+    // Calculate dimensions in pixels
+    const cropWidth = completedCrop.width * scaleX;
+    const cropHeight = completedCrop.height * scaleY;
+    
+    // Set canvas size
+    canvas.width = cropWidth * pixelRatio;
+    canvas.height = cropHeight * pixelRatio;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) {
+      return null;
+    }
+
+    // Set quality
+    ctx.imageSmoothingQuality = 'high';
+    ctx.scale(pixelRatio, pixelRatio);
+
+    // Calculate the crop position in pixels
+    const cropX = completedCrop.x * scaleX;
+    const cropY = completedCrop.y * scaleY;
+
+    // Draw the cropped image
+    ctx.drawImage(
+      image,
+      cropX, cropY, cropWidth, cropHeight,
+      0, 0, cropWidth, cropHeight
+    );
+
+    // Get file extension from original file name
+    const fileExtension = fileName.split('.').pop()?.toLowerCase() || 'jpeg';
+    let mimeType = 'image/jpeg'; // default
+
+    if (fileExtension === 'png') {
+      mimeType = 'image/png';
+    } else if (fileExtension === 'svg') {
+      mimeType = 'image/svg+xml';
+    }
+
+    // Convert canvas to data URL
+    return canvas.toDataURL(mimeType, 0.95);
+  };
+
+  // Function to handle image cropping
+  const handleCropImage = () => {
+    if (!imgRef.current) {
+      setError('No image loaded');
+      if (onImageCropped && shouldDownload) {
+        onImageCropped(null);
+      }
+      return;
+    }
+    
+    // If no completedCrop is defined, use the current crop
+    if (!completedCrop && imgRef.current) {
+      // Use the current crop as the completed crop
+      setCompletedCrop(crop);
+    }
+    
+    // Get the cropped image
+    const croppedImageUrl = getCroppedImage();
+    
+    // Only call onImageCropped when shouldDownload is true (from the Download button)
+    if (onImageCropped && shouldDownload) {
+      onImageCropped(croppedImageUrl, fileName);
+    }
+  };
+
+  // Listen for crop requests from parent
+  useEffect(() => {
+    // If onRequestCrop is provided (not undefined), trigger the crop
+    if (onRequestCrop !== undefined) {
+      handleCropImage();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [onRequestCrop, shouldDownload]);
+
+  return (        
     <>
       <div className="grid w-full max-w-sm items-center gap-2.5">
         <label htmlFor="image" className="text-lg font-medium leading-none mb-2">
@@ -232,8 +262,8 @@ useEffect(() => {
         </label>
         <div className="relative">
           <div className="flex w-full">
-            <label 
-              htmlFor="image" 
+            <label
+              htmlFor="image"
               className="flex-shrink-0 cursor-pointer bg-black hover:bg-gray-800 text-white rounded-l-md px-4 py-3 font-medium"
             >
               Browse...
@@ -251,10 +281,10 @@ useEffect(() => {
           />
         </div>
       </div>
-      <div 
+      <div
         className={`border-2 border-dashed rounded-lg p-5 h-fit w-full mt-4 transition-colors 
-          ${isDragging 
-            ? "border-black bg-gray-100" 
+          ${isDragging
+            ? "border-black bg-gray-100"
             : "border-gray-300 bg-gray-50 hover:bg-gray-100 hover:border-gray-400"
           }`}
         onDragEnter={handleDragEnter}
@@ -276,27 +306,27 @@ useEffect(() => {
               </div>
             )}
             {error && <p className="text-base text-red-500 p-4 text-center bg-red-50 rounded-md border border-red-200">{error}</p>}
-            {imageUrl && !error && (
-              <ReactCrop
-                crop={crop}
-                onChange={(percentCrop) => setCrop(percentCrop)}
-                minWidth={MIN_DIMENSION}
-                keepSelection
-                aspect={aspectRatio}
-              >
+                        {imageUrl && !error && (
+                <ReactCrop
+                  crop={crop}
+                  onChange={(c) => setCrop(c)}
+                  onComplete={(c) => setCompletedCrop(c)}
+                  minWidth={MIN_DIMENSION}
+                  keepSelection
+                  aspect={aspectRatio}
+                >
                 <img
-                  ref={(img) => {
-                    if (img) imgRef.current = img;
-                  }}
+                  ref={imgRef}
                   src={imageUrl}
                   alt="Uploaded"
                   className="rounded-md"
                   onLoad={onImageLoad}
+                  style={{ maxHeight: '500px', maxWidth: '100%', objectFit: 'contain' }}
                 />
-              </ReactCrop>
+                </ReactCrop>
             )
             }
-          </div>
+            </div>
         </div>
       </div>
     </>

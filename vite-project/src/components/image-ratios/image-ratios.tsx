@@ -9,8 +9,6 @@ interface ImageRatiosProps {
 
 const ImageRatios = React.memo(function ImageRatios({ selectedAspectRatio, handleAspectRatioChange }: ImageRatiosProps) {
   return (
-
-
     <div className="space-y-3 py-3 bg-slate-50 p-4 rounded-md border border-slate-200">
       <label className="text-base font-medium leading-none mb-3 block text-center">Aspect ratio</label>
       <ToggleGroup
@@ -31,7 +29,6 @@ const ImageRatios = React.memo(function ImageRatios({ selectedAspectRatio, handl
         ))}
       </ToggleGroup>
     </div>
-
   );
 });
 
