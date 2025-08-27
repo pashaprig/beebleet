@@ -12,12 +12,13 @@ type ImageCroperProps = {
 
 const ImageCroper = React.memo(function ImageCroper({ aspectRatio = 1, onRequestCrop, onImageCropped, shouldDownload = false }: ImageCroperProps) {
   // Initialize crop with a default value
+  const xyPosition = (100-MIN_DIMENSION)/2
   const [crop, setCrop] = useState<Crop>({
     unit: '%' as const,
-    width: 75,
-    height: 75 / aspectRatio,
-    x: 12.5,
-    y: 12.5
+    width: MIN_DIMENSION,
+    height: MIN_DIMENSION / aspectRatio,
+    x: xyPosition,
+    y: xyPosition
   });
   const [completedCrop, setCompletedCrop] = useState<Crop | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -126,13 +127,13 @@ const ImageCroper = React.memo(function ImageCroper({ aspectRatio = 1, onRequest
     const img = e.currentTarget;
     const { width, height } = img;
     
-    // Create a centered crop that takes 75% of the image width
+    // Create a centered crop that takes MIN_DIMENSION% of the image width
     const newCrop: Crop = {
       unit: '%' as const,
-      width: 75,
-      height: (75 / aspectRatio) * (width / height),
-      x: 12.5,
-      y: (100 - (75 / aspectRatio) * (width / height)) / 2
+      width: MIN_DIMENSION,
+      height: (MIN_DIMENSION / aspectRatio) * (width / height),
+      x: xyPosition,
+      y: (100 - (MIN_DIMENSION / aspectRatio) * (width / height)) / 2
     };
     
     // Update the crop state
@@ -150,10 +151,10 @@ const ImageCroper = React.memo(function ImageCroper({ aspectRatio = 1, onRequest
       // Create a centered crop with the new aspect ratio
       const newCrop: Crop = {
         unit: '%' as const,
-        width: 75,
-        height: (75 / aspectRatio) * (width / height),
-        x: 12.5,
-        y: (100 - (75 / aspectRatio) * (width / height)) / 2
+        width: MIN_DIMENSION,
+        height: (MIN_DIMENSION / aspectRatio) * (width / height),
+        x: xyPosition,
+        y: (100 - (MIN_DIMENSION / aspectRatio) * (width / height)) / 2
       };
       
       // Update both crop states
@@ -268,7 +269,7 @@ const ImageCroper = React.memo(function ImageCroper({ aspectRatio = 1, onRequest
             >
               Browse...
             </label>
-            <div className="flex-grow border-2 border-l-0 border-gray-200 rounded-r-md px-4 py-3 bg-gray-50 truncate">
+            <div className="flex-grow border-2 border-l-0 border-gray-200 rounded-r-md px-4 py-3 bg-gray-MIN_DIMENSION truncate">
               {fileName ? fileName : "No file selected"}
             </div>
           </div>
@@ -281,18 +282,19 @@ const ImageCroper = React.memo(function ImageCroper({ aspectRatio = 1, onRequest
           />
         </div>
       </div>
+      <p className="text-sm text-gray-MIN_DIMENSION0">or drop your image below</p>
       <div
         className={`border-2 border-dashed rounded-lg p-5 h-fit w-full mt-4 transition-colors 
           ${isDragging
             ? "border-black bg-gray-100"
-            : "border-gray-300 bg-gray-50 hover:bg-gray-100 hover:border-gray-400"
+            : "border-gray-300 bg-gray-MIN_DIMENSION hover:bg-gray-100 hover:border-gray-400"
           }`}
         onDragEnter={handleDragEnter}
         onDragLeave={handleDragLeave}
         onDragOver={handleDragOver}
         onDrop={handleDrop}
       >
-        <div className="flex items-center justify-center min-h-[250px] h-fit">
+        <div className="flex items-center justify-center min-h-[2MIN_DIMENSIONpx] h-fit">
           <div className="flex items-center justify-center h-full w-full">
             {!imageUrl && !error && (
               <div className="flex flex-col items-center justify-center p-6 text-center">
@@ -305,7 +307,7 @@ const ImageCroper = React.memo(function ImageCroper({ aspectRatio = 1, onRequest
                 <p className="text-xs text-gray-400 mt-3">Supported formats: JPG, PNG, SVG</p>
               </div>
             )}
-            {error && <p className="text-base text-red-500 p-4 text-center bg-red-50 rounded-md border border-red-200">{error}</p>}
+            {error && <p className="text-base text-red-MIN_DIMENSION0 p-4 text-center bg-red-MIN_DIMENSION rounded-md border border-red-200">{error}</p>}
                         {imageUrl && !error && (
                 <ReactCrop
                   crop={crop}
@@ -321,7 +323,7 @@ const ImageCroper = React.memo(function ImageCroper({ aspectRatio = 1, onRequest
                   alt="Uploaded"
                   className="rounded-md"
                   onLoad={onImageLoad}
-                  style={{ maxHeight: '500px', maxWidth: '100%', objectFit: 'contain' }}
+                  style={{ maxHeight: 'MIN_DIMENSION0px', maxWidth: '100%', objectFit: 'contain' }}
                 />
                 </ReactCrop>
             )

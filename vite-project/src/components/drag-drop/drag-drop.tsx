@@ -13,14 +13,14 @@ type ComponentItem = {
 export function DragDropContainer() {
   const [components, setComponents] = useState<ComponentItem[]>([
     {
-      id: "image-manager",
-      title: "Image Manager",
-      component: <ImageUpload />
-    },
-    {
       id: "text-component",
       title: "Text Component",
       component: <TextEditor />
+    },
+    {
+      id: "image-manager",
+      title: "Image Manager",
+      component: <ImageUpload />
     }
   ]);
 

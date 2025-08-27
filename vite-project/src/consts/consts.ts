@@ -1,6 +1,6 @@
 import type { TAspectRatioOption } from "@/types/image-types";
 
-export const MIN_DIMENSION = 150;
+export const MIN_DIMENSION = 50;
 export const SUPPORTED_FORMATS = ['image/jpeg', 'image/png', 'image/svg+xml'];
 export const FORMAT_EXTENSIONS = '.jpg, .jpeg, .png, .svg';
 

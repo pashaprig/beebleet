@@ -19,8 +19,8 @@ const ImageUpload = React.memo(function ImageUpload() {
     setShouldDownload(true); // Set flag to indicate this is a download request
     setCropRequestId(prev => prev + 1); // Increment to trigger effect in child component
   }, []);
-  
-    // Handle the cropped image result
+
+  // Handle the cropped image result
   const handleImageCropped = useCallback((croppedImage: string | null, originalFileName?: string) => {
     setIsDownloading(true);
 
@@ -29,22 +29,22 @@ const ImageUpload = React.memo(function ImageUpload() {
         // Create a temporary link element
         const link = document.createElement('a');
         link.href = croppedImage;
-        
+
         // Get file extension from the data URL
-        const fileExtension = croppedImage.startsWith('data:image/png') ? 'png' : 
-                             croppedImage.startsWith('data:image/svg+xml') ? 'svg' : 'jpg';
-        
+        const fileExtension = croppedImage.startsWith('data:image/png') ? 'png' :
+          croppedImage.startsWith('data:image/svg+xml') ? 'svg' : 'jpg';
+
         // Create a filename based on the original filename if available
         let downloadFilename = 'cropped-image';
-        
+
         if (originalFileName) {
           // Remove file extension from original name
           const nameWithoutExtension = originalFileName.replace(/\.[^/.]+$/, "");
           downloadFilename = `${nameWithoutExtension}-cropped`;
         }
-        
+
         link.download = `${downloadFilename}.${fileExtension}`;
-        
+
         // Append to the document, trigger click and remove
         document.body.appendChild(link);
         link.click();

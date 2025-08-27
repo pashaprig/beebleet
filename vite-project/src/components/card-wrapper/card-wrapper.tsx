@@ -25,14 +25,14 @@ const CardWrapper = React.memo(({
   const headerRef = useRef<HTMLDivElement>(null);
 
   // Drag event handlers
-  const handleDragStart = (e: React.DragEvent<HTMLDivElement>) => {
+    const handleDragStart = (e: React.DragEvent<HTMLDivElement>) => {
     // Set data for dragging
     e.dataTransfer.setData("text/plain", id);
     e.dataTransfer.effectAllowed = "move";
 
     // Store a reference to the current target
     const currentTarget = e.currentTarget;
-
+    
     // Set opacity of the dragged element using CSS classes instead of direct style manipulation
     setTimeout(() => {
       if (currentTarget) {
@@ -40,12 +40,17 @@ const CardWrapper = React.memo(({
       }
     }, 0);
 
+    // Call the parent's onDragStart handler with this component's ID
     onDragStart();
   };
 
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
+    
+    // Set the drop effect and call the callback
     e.dataTransfer.dropEffect = "move";
+    
+    // Call the parent's onDragOver handler with this component's ID
     onDragOver();
   };
 
@@ -58,6 +63,7 @@ const CardWrapper = React.memo(({
       currentTarget.classList.remove("opacity-40");
     }
 
+    // Call the parent's onDragEnd handler
     onDragEnd();
   };
 
@@ -77,6 +83,8 @@ const CardWrapper = React.memo(({
       draggable={true}
       onDragStart={handleDragStart}
       onDragOver={handleDragOver}
+      onDragEnter={(e) => e.preventDefault()}
+      onDrop={(e) => e.preventDefault()}
       onDragEnd={handleDragEnd}
     >
       <div
