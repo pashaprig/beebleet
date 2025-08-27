@@ -1,61 +1,29 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Slider } from "@/components/ui/slider";
-import React, { useState } from "react";
+import React from "react";
+import ImageCroper from "../image-cropper/image-cropper";
 
-const ImageUpload = React.memo(function ImageUpload(){
-  const [imageUrl, setImageUrl] = useState<string>('');
+const ImageUpload = React.memo(function ImageUpload() {
 
-  const onSelectImage = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if(!file) return
-
-    const reader = new FileReader();
-    reader.addEventListener("load", () => {
-      const imageUrl = reader.result as string;
-      setImageUrl(imageUrl);
-    });
-    reader.readAsDataURL(file);
-  };
   return (
-    <Card className="w-full max-w-md">
-      <CardHeader>
-        <CardTitle>Image Upload</CardTitle>
-        <CardDescription>Upload and crop your image</CardDescription>
+    <Card className="w-full max-w-xl">
+      <CardHeader className="pb-4 bg-gradient-to-r rounded-t-lg">
+        <CardTitle className="text-2xl ">Image Manager</CardTitle>
+        <CardDescription className="text-base ">Upload, crop, and customize your images</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="grid w-full max-w-sm items-center gap-1.5">
-          <label htmlFor="image" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-            Select image
-          </label>
-          <input
-            id="image"
-            type="file"
-            onChange={onSelectImage}
-            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-          />
 
+        <ImageCroper />
+
+                <div className="space-y-3 py-3 bg-slate-50 p-4 rounded-md border border-slate-200">
+          <label className="text-base font-medium leading-none">Crop ratio</label>
+          <Slider defaultValue={[50]} max={100} step={1} className="h-3" />
         </div>
         
-        <div className="border rounded-md p-4">
-          <AspectRatio ratio={16 / 9} className="bg-muted">
-            <div className="flex items-center justify-center h-full">
-              {imageUrl ? (
-                <img src={imageUrl} alt="Uploaded" className="w-full h-full object-cover rounded-md" />
-              ) : (
-                <p className="text-sm text-muted-foreground">Image preview will appear here</p>
-              )}
-            </div>
-          </AspectRatio>
-        </div>
-        
-        <div className="space-y-2">
-          <label className="text-sm font-medium leading-none">Crop ratio</label>
-          <Slider defaultValue={[50]} max={100} step={1} />
-        </div>
-        
-        <Button className="w-full">Save Image</Button>
+        <Button className="w-full text-lg font-medium">
+          Save Image
+        </Button>
       </CardContent>
     </Card>
   );

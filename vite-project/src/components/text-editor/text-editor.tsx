@@ -12,7 +12,7 @@ const TextEditor = React.memo(function TextEditor() {
         <CardTitle>Text Editor</CardTitle>
         <CardDescription>Add and format text</CardDescription>
       </CardHeader>
-      <CardContent className="flex flex-col space-y-4">
+      <CardContent className="flex flex-col space-y-4  flex-grow-1">
         <div className="space-y-2">
           <div className="flex flex-wrap gap-2">
             <ToggleGroup type="multiple"  className="flex-wrap">
@@ -43,7 +43,7 @@ const TextEditor = React.memo(function TextEditor() {
         
         <Textarea 
           placeholder="Enter your text here..." 
-          className="min-h-[220px]" 
+          className="min-h-[220px]  flex-grow-1" 
         />
         
         <Button className="w-full">Save Text</Button>
