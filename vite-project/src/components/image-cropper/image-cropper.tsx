@@ -5,7 +5,7 @@ import { FORMAT_EXTENSIONS, MAX_FILE_SIZE, MIN_DIMENSION, SUPPORTED_FORMATS } fr
 
 type ImageCroperProps = {
   aspectRatio?: number;
-  onRequestCrop?: () => void;
+  onRequestCrop?: number;
   onImageCropped?: (croppedImage: string | null, originalFileName?: string) => void;
   shouldDownload?: boolean;
 }
@@ -120,8 +120,6 @@ const ImageCroper = React.memo(function ImageCroper({ aspectRatio = 1, onRequest
       }
     }
   };
-
-
 
   const onImageLoad = (e: React.SyntheticEvent<HTMLImageElement>) => {
     const img = e.currentTarget;
@@ -248,8 +246,8 @@ const ImageCroper = React.memo(function ImageCroper({ aspectRatio = 1, onRequest
 
   // Listen for crop requests from parent
   useEffect(() => {
-    // If onRequestCrop is provided (not undefined), trigger the crop
-    if (onRequestCrop !== undefined) {
+    // If onRequestCrop is greater than 0, trigger the crop
+    if (onRequestCrop && onRequestCrop > 0) {
       handleCropImage();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -336,4 +334,3 @@ const ImageCroper = React.memo(function ImageCroper({ aspectRatio = 1, onRequest
 });
 
 export default ImageCroper;
-export type { ImageCroperProps };

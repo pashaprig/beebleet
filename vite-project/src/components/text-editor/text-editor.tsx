@@ -46,7 +46,7 @@ const TextEditor = React.memo(function TextEditor() {
           className="min-h-[220px]  flex-grow-1" 
         />
         
-        <Button className="w-full text-lg font-medium">Save Text</Button>
+        <Button className="w-full text-lg font-medium active:scale-95">Save Text</Button>
       </CardContent>
     </Card>
   );

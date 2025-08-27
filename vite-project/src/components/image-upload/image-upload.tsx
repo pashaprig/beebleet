@@ -16,13 +16,15 @@ const ImageUpload = React.memo(function ImageUpload() {
 
   // Function to trigger crop request
   const handleRequestCrop = useCallback(() => {
-    setShouldDownload(true); // Set flag to indicate this is a download request
-    setCropRequestId(prev => prev + 1); // Increment to trigger effect in child component
+    setShouldDownload(true);
+    setCropRequestId(prev => prev + 1);
   }, []);
 
   // Handle the cropped image result
   const handleImageCropped = useCallback((croppedImage: string | null, originalFileName?: string) => {
+
     setIsDownloading(true);
+
 
     try {
       if (croppedImage) {
@@ -53,9 +55,11 @@ const ImageUpload = React.memo(function ImageUpload() {
     } catch (error) {
       console.error('Error downloading image:', error);
     } finally {
+
       setIsDownloading(false);
-      setShouldDownload(false); // Reset the download flag
+      setShouldDownload(false);
     }
+
   }, []);
 
   return (
@@ -68,7 +72,7 @@ const ImageUpload = React.memo(function ImageUpload() {
 
         <ImageCroper
           aspectRatio={selectedAspectRatio}
-          onRequestCrop={cropRequestId > 0 ? () => { } : undefined}
+          onRequestCrop={cropRequestId}
           onImageCropped={handleImageCropped}
           shouldDownload={shouldDownload}
         />
@@ -78,7 +82,7 @@ const ImageUpload = React.memo(function ImageUpload() {
         />
 
         <Button
-          className="w-full text-lg font-medium"
+          className="w-full text-lg font-medium active:scale-95"
           onClick={handleRequestCrop}
           disabled={isDownloading}
         >
